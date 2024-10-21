@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Codice.Client.Common.GameUI;
 using Codice.CM.Client.Differences;
 using JetBrains.Annotations;
+using UnityEditor.Graphs;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
@@ -11,109 +13,125 @@ public class Player : MonoBehaviour
     public Transform enemyTransform;
     public GameObject bombPrefab;
     public Transform bombsTransform;
-
+    public GameObject projectile;
 
     public float radius;
     public List<int> circlePoints = new List<int>() { 0, 45, 90, 135, 180, 270, 360 };
     private int currentCirclePoint;
     public Vector3 offset;
     public float updateFrequency;
-
     private float timeSinceLastUpdate = 0f;
 
-    private Vector3 velocity = Vector3.zero;
-    private Vector3 velo2 = Vector3.zero;
-    private float maxSpeed;
+    private Vector3 transformSpawn;
+    //Basic character movement: velocity
+    public float maxSpeed;
+    private Vector3 currentVelocity;
 
-
-    //The amount of time it will take to reach the target speed(1 is v fast, slow speed is 3)
-    private float timeToReachSpeed = 30f;
-    //The speed that we want the character to reach after a certain amount of time
-    private float targetSpeed = 2f;
-    private float deacceleration;
+    //Acceleration
+    public float accelerationTime;
     private float acceleration;
-    private float acceltime;
+
+    //Deceleration
+    public float decelerationTime;
+    private float deceleration;
     private List<string> words = new List<string>();
 
 
     private void Start()
     {
-        acceleration = targetSpeed / timeToReachSpeed;
-        deacceleration = acceleration - 5;
-    }
+        deceleration = maxSpeed / decelerationTime;
+        acceleration = maxSpeed / accelerationTime;
+      
+
+
+}
+
     void Update()
     {
-        velocity += acceleration * transform.up * Time.deltaTime;
-        velo2 += acceleration * transform.right * Time.deltaTime;
-        transform.position += velocity * Time.deltaTime;
-        playerMove();
+
+        Vector3 playerToEnemy = enemyTransform.position - transform.position;
+        Debug.DrawLine(Vector3.zero, playerToEnemy, Color.red);
+
+
+        if (Input.GetKey(KeyCode.B))
+        {
+            SpawnBombAtOffset(playerToEnemy);
+           
+
+        }
+
+
+
         enemyRadar();
 
-        words.Add("Cat");
-        words.Add("Dog");
-
-        words.Add("Log");
-        words.Add("Car");
-
-
-        words.Insert(2, "Log");
-        words.Remove("Dog");
-        Debug.Log("Box is currently at the index: " + words.IndexOf("Box"));
-
-        for (int i = 0; i < words.Count; i++)//both work
-        {
-            Debug.Log(words[i]);
-        }
-
-        foreach (string word in words)
-        {
-            Debug.Log(word);
-        }
-
-
-
-
-    }
-
-    public void playerMove()
-    {
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-
-            transform.position += acceleration * velocity.normalized * Time.deltaTime;
-            //update velo instead of pos
-
-        }
-
-        else if (Input.GetKeyUp(KeyCode.UpArrow)) {
-
-            acceleration = deacceleration * Time.deltaTime;
-        }
-
-        if (Input.GetKey(KeyCode.DownArrow))
-        {
-            transform.position -= acceleration * velocity.normalized * Time.deltaTime;
-        }
-
+        Vector2 currentInput = Vector2.zero;
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            transform.position -= acceleration * velo2.normalized * Time.deltaTime;
+            currentInput += Vector2.left;
         }
-
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            transform.position += acceleration * velo2.normalized * Time.deltaTime;
-
+            currentInput += Vector2.right;
         }
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            currentInput += Vector2.up;
+        }
+        if (Input.GetKey(KeyCode.DownArrow))
+        {
+            currentInput += Vector2.down;
+        }
+
+        if (currentInput.magnitude > 0)
+        {
+            //Our character is accelerating
+            currentVelocity += acceleration * Time.deltaTime * (Vector3)currentInput.normalized;
+
+            if (currentVelocity.magnitude > maxSpeed)
+            {
+                currentVelocity = currentVelocity.normalized * maxSpeed;
+            }
+        }
+        else
+        {
+            //Our character is decelerating
+            Vector3 velocityDelta = (Vector3)currentVelocity.normalized * deceleration * Time.deltaTime;
+            if (velocityDelta.magnitude > currentVelocity.magnitude)
+            {
+                currentVelocity = Vector3.zero;
+            }
+            else
+            {
+                currentVelocity -= velocityDelta;
+            }
+        }
+        transform.position += currentVelocity * Time.deltaTime;
     }
 
+
+
+    
+
+    void SpawnBombAtOffset(Vector3 inOffset)
+    {
+       
+        inOffset.x = 1;
+        bombPrefab = Instantiate(bombPrefab, transform.position + inOffset, Quaternion.identity);
+        
+       
+    }
+   
+    
+
+
+   
     public void spawnPowerUps(float radius, int numberOfPowerUps)
     {
         Vector3 test = new Vector3(0, 2);
 
         numberOfPowerUps = 4;
 
-        if (radius ==1 )
+        if (radius == 1)
         {
 
             numberOfPowerUps = 1;
@@ -146,8 +164,11 @@ public class Player : MonoBehaviour
 
         }
     }
-
 }
+
+
+
+
 
 
 
