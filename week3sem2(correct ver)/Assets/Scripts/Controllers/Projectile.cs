@@ -21,18 +21,21 @@ public class Projectile : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);//gets mouse input and converts it into a usable vector 
         Vector2 direction = mousePosition - transform.position;
         float angle = Vector2.SignedAngle(Vector2.right, direction);
-        Vector3 targetRotation = new Vector3(0, 0, angle);
+        
+        Vector3 targetRotation = new Vector3(0, 0, angle);//makes turning and the like possible
         transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.Euler(targetRotation), turnSpeed * Time.deltaTime);
+        
         transform.Translate(Vector3.right * speed * Time.deltaTime);
+        
         transform.position = Vector2.MoveTowards(transform.position, mousePosition, moveSpeed * Time.deltaTime);
 
         Destroy(projectile, 5f);
          if (Input.GetKeyUp(KeyCode.Space))
         {
-            Instantiate(projectile, Vector3.zero, Quaternion.identity);
+            Instantiate(projectile, Vector3.zero, Quaternion.identity);//spawns new projectiles in
            
         }
 

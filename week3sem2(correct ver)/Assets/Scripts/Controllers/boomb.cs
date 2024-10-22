@@ -16,16 +16,17 @@ public class boomb : MonoBehaviour
         if(Input.GetKey(KeyCode.B))
         {
             StartCoroutine(bombExplode());
+           
         }
     }
-    // Start is called before the first frame update
+   
     void Boom()
-    {
+    { //overlap circle just checks what is within the colider, just in a circle
         int numColliders = Physics2D.OverlapCircle(transform.position, radius, contactFilter, affectedColliders);
 
         if (numColliders > 0)
         {
-            for (int i = 0; i < numColliders; i++)
+            for (int i = 0; i < numColliders; i++)//creates the force needed for the bomb
             {
                 if (affectedColliders[i].gameObject.TryGetComponent(out Rigidbody2D rb))
                 {
@@ -39,7 +40,7 @@ public class boomb : MonoBehaviour
         }
     }
 
-    IEnumerator bombExplode()
+    IEnumerator bombExplode()//timer for bomb
     {
         yield return new WaitForSeconds(1f);
         Boom();

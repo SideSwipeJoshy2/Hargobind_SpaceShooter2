@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
         Vector3 playerToEnemy = enemyTransform.position - transform.position;
         Debug.DrawLine(Vector3.zero, playerToEnemy, Color.red);
 
-
+        //spawns a bomb if b is pressed
         if (Input.GetKey(KeyCode.B))
         {
             SpawnBombAtOffset(playerToEnemy);
@@ -118,7 +118,7 @@ public class Player : MonoBehaviour
         inOffset.x = 1;
         bombPrefab = Instantiate(bombPrefab, transform.position + inOffset, Quaternion.identity);
         
-       
+       //bomb spawner
     }
    
     
